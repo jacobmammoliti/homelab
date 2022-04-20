@@ -1,0 +1,130 @@
+---
+- name: Ensure passwordless sudo
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^%sudo"
+    line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+
+- name: Create vimrc profile
+  ansible.builtin.copy:
+    src: "vimrc"
+    dest: "/home/{{ ansible_user }}/.vimrc"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Remove snap items
+  community.general.snap:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - lxd
+    - core18
+    - snapd
+  ignore_errors: true
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove snapd and dependencies no longer required
+  ansible.builtin.apt:
+    state: absent
+    name: snapd
+    purge: true
+    autoremove: true
+  register: update
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Create group '{{ nfs.group }}' with correct gid
+  ansible.builtin.group:
+    name: "{{ nfs.group }}"
+    state: present
+    gid: "{{ nfs.gid }}"
+
+- name: Create user '{{ nfs.username }}' with correct uid
+  ansible.builtin.user:
+    name: "{{ nfs.username }}"
+    home: "/home/{{ nfs.username }}"
+    group: "{{ nfs.group }}"
+    shell: /bin/bash
+    uid: "{{ nfs.uid }}"
+
+- name: Ensure all required packages are present
+  ansible.builtin.apt:
+    name:
+      - nfs-common
+      - unzip
+      - curl
+      - python3-pip
+      - software-properties-common
+      - ca-certificates
+      - vim-gui-common
+      - vim-runtime
+      - lm-sensors
+      - tcpdump
+      - network-manager
+    state: present
+    update_cache: true
+
+- name: Ensure all python packages are present and are up-to-date
+  pip:
+    name: 
+      - python-consul
+    state: latest
+    
+- name: Ensure all packages are up-to-date
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    autoclean: true
+
+- name: Add internal CA to trust store
+  ansible.builtin.copy:
+    src: "{{ ca_path }}"
+    dest: "/usr/local/share/ca-certificates/blizzard-ca.crt"
+  when: ca_path is defined
+  notify:
+    - Update CA certificates
+
+- name: Create array and storage directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0755
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  loop:
+    - path: /array
+      owner: "{{ nfs.username }}"
+      group: "{{ nfs.group }}"
+    - path: "{{ persistent_storage_path }}"
+      owner: root
+      group: root
+
+- name: Mount NFS volume
+  ansible.posix.mount:
+    src: "{{ nfs.address }}:{{ nfs.remote_path }}"
+    path: "/array"
+    opts: rw,sync,hard,intr
+    state: mounted
+    fstype: nfs
+
+- name: Mount USB drive to storage directory
+  ansible.posix.mount:
+    src: "{{ usb.device }}"
+    path: "{{ persistent_storage_path }}"
+    fstype: "{{ usb.fstype }}"
+    state: present
+    opts: defaults
+  when: usb.mount
+
+- name: Reboot
+  block:
+    - name: Reboot nodes
+      ansible.builtin.reboot:
+
+    - name: Wait maximum 200 seconds, but only start checking after 15 seconds
+      ansible.builtin.wait_for_connection:
+        delay: 15
+        timeout: 200
+  when:
+    - allow_reboot

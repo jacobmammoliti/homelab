@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sonarr
+spec:
+  serviceName: sonarr
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      labels:
+        app: sonarr
+    spec:
+      serviceAccountName: sonarr
+      containers:
+      - name: sonarr
+        image: linuxserver/sonarr:3.0.7.1477-ls136
+        env:
+        - name: PUID
+          value: '1027'
+        - name: PGID
+          value: '100'
+        - name: TZ
+          value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 8989
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: tv-shows
+          mountPath: /tv
+        - name: downloads
+          mountPath: /downloads
+        ports:
+        - name: sonarr-ui
+          containerPort: 8989
+      volumes:
+      - name: downloads
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/downloads
+      - name: tv-shows
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/tv-shows
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

@@ -1,0 +1,7 @@
+---
+- name: Initalize node
+  include_tasks: initialize.yml
+
+- name: Install Plex
+  include_tasks: plex.yml
+  when: plex_install

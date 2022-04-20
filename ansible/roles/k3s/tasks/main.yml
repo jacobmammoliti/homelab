@@ -1,0 +1,28 @@
+---
+- name: Install Kubernetes cluster
+  include_tasks: install.yml
+
+- name: Configuring Kubernetes cluster
+  block:
+  - name: Install MetalLB
+    include_tasks: metallb.yml
+    when: metallb_install
+
+  - name: Install NGINX ingress controller
+    include_tasks: nginx.yml
+    when: nginx_install
+
+  - name: Install Secrets Store CSI driver
+    include_tasks: secrets-store-csi-driver.yml
+    when: secrets_store_csi_driver_install
+  
+  - name: Install Longhorn
+    include_tasks: longhorn.yml
+    when: longhorn_install
+
+  - name: Install ArgoCD
+    include_tasks: argocd.yml
+    when: argocd_install
+  delegate_to: localhost
+  run_once: true
+  become: false

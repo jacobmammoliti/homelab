@@ -1,0 +1,9 @@
+{% if inventory_hostname == groups[k3s_controller_group_name][0] %}
+cluster-init: true
+{% else %}
+server: https://{{ hostvars[groups[k3s_controller_group_name][0]]['ansible_hostname'] }}:6443
+token-file: {{ k3s_token_file }}
+{% endif %}
+{% if k3s_controller_group_name in group_names %}
+{{ k3s_server_config | to_nice_yaml }}
+{% endif %}

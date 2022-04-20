@@ -1,0 +1,12 @@
+---
+ansible_user: pi
+allow_reboot: false
+ca_path: "/Users/jacobmammoliti/Documents/CA/blizzard-ca.crt"
+usb:
+  mount: true
+  device: /dev/sda
+  fstype: ext4
+
+consul_ansible_group: raspberrypi
+is_consul_server: true
+datacenter: blizzard

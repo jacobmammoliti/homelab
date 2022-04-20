@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prowlarr
+spec:
+  serviceName: prowlarr
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      serviceAccountName: prowlarr
+      containers:
+      - name: prowlarr
+        image: linuxserver/prowlarr:nightly-0.2.0.1572-ls292
+        env:
+          - name: PUID
+            value: '1027'
+          - name: PGID
+            value: '100'
+          - name: TZ
+            value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 9696
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        ports:
+        - name: prowlarr-ui
+          containerPort: 9696
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

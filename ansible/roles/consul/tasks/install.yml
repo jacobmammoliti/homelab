@@ -1,0 +1,73 @@
+---
+- name: Creating Consul group
+  ansible.builtin.group:
+    name: '{{ group }}'
+    system: true
+
+- name: Creating Consul user
+  ansible.builtin.user:
+    name: '{{ user }}'
+    home: '{{ home_directory }}'
+    group: '{{ group }}'
+    shell: /sbin/nologin
+    system: true
+
+- name: Creating Consul directories
+  ansible.builtin.file:
+    state: directory
+    path: '{{ item }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0750'
+  with_items:
+    - '{{ home_directory }}'
+    - '{{ data_directory }}'
+    - '{{ tls_directory }}'
+
+- name: Installing Consul binary from remote source
+  ansible.builtin.unarchive:
+    src: '{{ download_location }}'
+    dest: '{{ install_directory }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    remote_src: true
+    mode: '0755'
+  notify:
+    - Restart Consul
+
+- name: Templating out Consul client configuration
+  ansible.builtin.template:
+    src: consul.hcl.j2
+    dest: '{{ client_config_file }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0660'
+  notify:
+    - Restart Consul
+
+- name: Templating out Consul server configuration
+  ansible.builtin.template:
+    src: server.hcl.j2
+    dest: '{{ server_config_file }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0660'
+  when: is_consul_server
+  notify:
+    - Restart Consul
+
+- name: Templating out systemd script
+  ansible.builtin.template:
+    src: consul.service.j2
+    dest: /lib/systemd/system/consul.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload Consul daemon
+
+- name: Starting and enabling Consul
+  ansible.builtin.systemd:
+    name: consul
+    enabled: true
+    state: started

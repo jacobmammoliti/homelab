@@ -1,0 +1,13 @@
+---
+- name: Initalize nodes
+  hosts: macminis, raspberrypi
+  become: true
+  roles:
+    - initialize
+    - consul
+
+- name: Create Kubernetes cluster
+  hosts: macmini_k3s
+  become: true
+  roles:
+    - k3s

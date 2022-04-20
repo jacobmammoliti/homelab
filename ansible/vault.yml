@@ -1,0 +1,32 @@
+---
+- name: Deploy HashiCorp Vault
+  hosts: vault
+  become: true
+  roles:
+    - ansible-role-vault
+
+- name: Additional Vault configurations
+  hosts: vault
+  become: true
+  tasks:
+    - name: Setup logrotate for Vault Audit
+      ansible.builtin.copy:
+        content: |
+          /opt/vault/vault_audit.log {
+            daily
+            rotate 3
+            size 10M
+            compress
+            delaycompress
+          }
+        dest: /etc/logrotate.d/vault.conf
+
+    - name: Register Vault service to local Consul agent
+      community.general.consul:
+        service_name: vault
+        service_port: 8200
+        tags:
+          - vault
+        check_name: vault-hc
+        interval: 30s
+        http: https://127.0.0.1:8200/v1/sys/health?standbyok=true&&perfstandbyok=true

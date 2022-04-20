@@ -1,0 +1,7 @@
+---
+vault:
+  injector:
+    enabled: true
+    externalVaultAddr: "https://vault.apps.internal:8200"
+  csi:
+    enabled: true

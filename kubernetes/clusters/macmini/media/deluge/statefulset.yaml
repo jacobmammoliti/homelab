@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: deluge
+spec:
+  serviceName: deluge
+  selector:
+    matchLabels:
+      app: deluge # has to match .spec.template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: deluge # has to match .spec.selector.matchLabels
+    spec:
+      serviceAccountName: deluge
+      containers:
+      - name: gluetun
+        image: qmcgaw/gluetun:latest
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        env:
+          - name: FIREWALL_INPUT_PORTS
+            value: '8112'
+          - name: VPNSP
+            valueFrom:
+              secretKeyRef:
+                name: vault-openvpn-secret
+                key: provider
+          - name: REGION
+            valueFrom:
+              secretKeyRef:
+                name: vault-openvpn-secret
+                key: region
+          - name: OPENVPN_USER
+            valueFrom:
+              secretKeyRef:
+                name: vault-openvpn-secret
+                key: username
+          - name: OPENVPN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vault-openvpn-secret
+                key: password
+        volumeMounts:
+          - name: vault-openvpn-secret
+            mountPath: '/mnt/secrets-store'
+            readOnly: true
+      - name: deluge
+        image: linuxserver/deluge:latest
+        env:
+          - name: PUID
+            value: '1027'
+          - name: PGID
+            value: '100'
+          - name: TZ
+            value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 8112
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: downloads
+            mountPath: /downloads
+        ports:
+          - name: deluge-ui
+            containerPort: 8112
+      volumes:
+        - name: downloads
+          nfs:
+            server: blizzardnas.blizzard.internal
+            path: /volume1/array/downloads
+        - name: vault-openvpn-secret
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: 'vault-deluge'
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

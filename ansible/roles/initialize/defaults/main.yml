@@ -1,0 +1,19 @@
+---
+allow_reboot: false
+
+nfs:
+  address: blizzardnas.blizzard.internal
+  remote_path: /volume1/array
+  username: media
+  group: users
+  uid: 1027
+  gid: 100
+
+persistent_storage_path: /mnt/persist
+
+usb:
+  mount: false
+  device: /dev/sda
+  fstype: ext4
+  
+plex_install: false

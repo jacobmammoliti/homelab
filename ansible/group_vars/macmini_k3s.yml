@@ -1,0 +1,4 @@
+---
+ansible_user: ubuntu
+k3s_controller_group_name: macmini_k3s_controllers
+argocd_install: false

@@ -1,0 +1,4 @@
+---
+ansible_user: pi
+k3s_controller_group_name: raspberrypi_k3s_controllers
+k3s_worker_group_name: raspberrypi_k3s_workers

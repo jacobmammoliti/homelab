@@ -1,0 +1,25 @@
+---
+- name: Retrieve NGINX manifests
+  local_action:
+    module: ansible.builtin.get_url
+    url: "{{ item }}"
+    dest: "./{{ item | basename }}"
+  with_items:
+    - https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ nginx_version }}/deploy/static/provider/cloud/deploy.yaml
+
+- name: Enable TLS passthrough
+  ansible.builtin.lineinfile:
+    path: deploy.yaml
+    insertafter: "        - /nginx-ingress-controller"
+    line: "            - --enable-ssl-passthrough"
+
+- name: Install NGINX ingress controller
+  kubernetes.core.k8s:
+    state: present
+    src: deploy.yaml
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+
+- name: Remove local NGINX manifests
+  ansible.builtin.file:
+    path: deploy.yaml
+    state: absent

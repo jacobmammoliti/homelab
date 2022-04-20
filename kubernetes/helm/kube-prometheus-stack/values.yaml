@@ -1,0 +1,36 @@
+---
+grafana:
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.apps.internal
+    ingressClassName: nginx
+  additionalDataSources:
+    - name: loki
+      editable: true
+      type: loki
+      url: http://loki.logging:3100
+      version: 1
+      orgId: 1
+prometheus:
+  ingress:
+    enabled: true
+    hosts:
+      - prometheus.apps.internal
+    ingressClassName: nginx
+  prometheusSpec:
+    additionalScrapeConfigs:
+      # - job_name: kubernetes_service_endpoints
+      #   kubernetes_sd_configs:
+      #     - role: service
+      #   scrape_interval: 5s
+      #   scrape_timeout: 2s
+      - job_name: vault
+        metrics_path: "/v1/sys/metrics"
+        params:
+          format: ['prometheus']
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        static_configs:
+          - targets: ['vault.apps.internal:8200']

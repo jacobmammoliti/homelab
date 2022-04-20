@@ -1,0 +1,19 @@
+---
+vault_storage_backend: "integrated"
+vault_version: "1.10.0"
+use_hashicorp_repository: false
+
+vault_tls_ca_cert_file: "/Users/jacobmammoliti/Documents/CA/blizzard-ca.crt"
+vault_tls_cert_file: "/Users/jacobmammoliti/Documents/CA/wildcard.service.blizzard.consul/cert.pem"
+vault_tls_key_file: "/Users/jacobmammoliti/Documents/CA/wildcard.service.blizzard.consul/cert-key.pem"
+vault_tls_disable_client_certs: true
+
+vault_leader_tls_servername: "vault.service.blizzard.consul"
+
+# vault_license_file: "/Users/jacobmammoliti/Documents/license.hclic"
+
+vault_unauthenticated_metrics_access: true
+
+vault_telemetry:
+  prometheus_retention_time: "30s"
+  disable_hostname: true

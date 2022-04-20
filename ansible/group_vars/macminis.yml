@@ -1,0 +1,13 @@
+---
+ansible_user: ubuntu
+allow_reboot: false
+plex_install: true
+usb:
+  mount: true
+  device: /dev/sdd
+  path: /mnt/kingston
+  fstype: ext4
+
+consul_ansible_group: raspberrypi
+is_consul_server: false
+datacenter: blizzard

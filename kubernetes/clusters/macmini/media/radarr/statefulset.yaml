@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radarr
+spec:
+  serviceName: radarr
+  selector:
+    matchLabels:
+      app: radarr
+  template:
+    metadata:
+      labels:
+        app: radarr
+    spec:
+      serviceAccountName: radarr
+      containers:
+      - name: radarr
+        image: linuxserver/radarr:4.0.5.5981-ls133
+        env:
+          - name: PUID
+            value: '1027'
+          - name: PGID
+            value: '100'
+          - name: TZ
+            value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 7878
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: movies
+            mountPath: /movies
+          - name: downloads
+            mountPath: /downloads
+        ports:
+        - name: radarr-ui
+          containerPort: 7878
+      volumes:
+        - name: downloads
+          nfs:
+            server: blizzardnas.blizzard.internal
+            path: /volume1/array/downloads
+        - name: movies
+          nfs:
+            server: blizzardnas.blizzard.internal
+            path: /volume1/array/movies
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

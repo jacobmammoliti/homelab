@@ -1,0 +1,6 @@
+---
+secrets-store-csi-driver:
+  syncSecret:
+    enabled: true
+    
+  enableSecretRotation: true

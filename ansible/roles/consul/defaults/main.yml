@@ -1,0 +1,28 @@
+---
+consul_ansible_group: consul
+user: consul
+group: consul
+
+datacenter: dc1
+
+home_directory: /etc/consul.d
+data_directory: /opt/consul
+tls_directory: '{{ data_directory }}/tls'
+install_directory: /usr/bin
+
+client_config_file: '{{ home_directory }}/consul.hcl'
+server_config_file: '{{ home_directory }}/server.hcl'
+
+architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  armv7l: arm
+  aarch64: arm64
+
+version: '1.11.5'
+os: '{{ ansible_system | lower }}'
+architecture: '{{ architecture_map[ansible_architecture] }}'
+archive: 'consul_{{ version }}_{{ os }}_{{ architecture }}.zip'
+download_location: 'https://releases.hashicorp.com/consul/{{ version }}/{{ archive }}'
+
+is_consul_server: false

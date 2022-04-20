@@ -1,0 +1,20 @@
+---
+- name: Add Plex GPG key
+  ansible.builtin.apt_key:
+    url: https://downloads.plex.tv/plex-keys/PlexSign.key
+
+- name: Add Plex repository
+  ansible.builtin.apt_repository:
+    repo: deb https://downloads.plex.tv/repo/deb public main
+
+- name: Ensure Plex package is installed and is up-to-date
+  ansible.builtin.apt:
+    name: plexmediaserver
+    state: latest
+    update_cache: true
+
+- name: Ensure Plex is started and enabled
+  ansible.builtin.systemd:
+    state: started
+    name: plexmediaserver
+    enabled: true

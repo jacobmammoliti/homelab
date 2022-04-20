@@ -1,0 +1,20 @@
+datacenter = "{{ datacenter }}"
+data_dir   = "{{ data_directory }}"
+
+bind_addr = "{{ ansible_default_ipv4.address }}"
+
+retry_join = [
+{% for server in groups[consul_ansible_group] %}
+  "{{ server }}"{% if not loop.last %},{% endif %}{{''}}
+{% endfor %}
+]
+
+acl {
+  enabled                  = false
+  default_policy           = "allow"
+  enable_token_persistence = true
+}
+
+performance {
+  raft_multiplier = 1
+}

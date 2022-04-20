@@ -1,0 +1,43 @@
+---
+- name: Retrieve MetalLB manifests
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "./{{ item | basename }}"
+  with_items:
+    - https://raw.githubusercontent.com/metallb/metallb/v{{ metallb_version }}/manifests/namespace.yaml
+    - https://raw.githubusercontent.com/metallb/metallb/v{{ metallb_version }}/manifests/metallb.yaml
+    
+- name: Install MetalLB
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+  with_items:
+    - namespace.yaml
+    - metallb.yaml
+
+- name: Create ConfigMap for MetalLB
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: config
+        namespace: metallb-system
+      data:
+        config: |
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - "{{ metallb_ipblock }}"
+    state: present
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+
+- name: Remove local MetalLB manifests
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - namespace.yaml
+    - metallb.yaml

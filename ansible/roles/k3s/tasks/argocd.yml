@@ -1,0 +1,70 @@
+---
+- name: Retrieve ArgoCD manifest
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "./{{ item | basename }}"
+  with_items:
+    - https://github.com/argoproj/argo-cd/blob/v{{ argocd_version }}/manifests/install.yaml
+
+# Quay image doesn't have an arm image
+- name: Replace Quay image with latest from DockerHub
+  ansible.builtin.replace:
+    path: install.yaml
+    regexp: "quay.io/argoproj/argocd:v{{ argocd_version }}"
+    replace: "argoproj/argocd:v{{ argocd_version }}"
+  become: false
+  run_once: true
+
+- name: Create namespace for ArgoCD
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argocd
+    state: present
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+
+- name: Install ArgoCD
+  kubernetes.core.k8s:
+    state: present
+    src: install.yaml
+    namespace: argocd
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+
+- name: Remove local ArgoCD manifests
+  ansible.builtin.file:
+    path: install.yaml
+    state: absent
+
+- name: Create an ingress object for ArgoCD
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: argocd
+        namespace: argocd
+        annotations:
+          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      spec:
+        ingressClassName: nginx
+        rules:
+        - host: argocd.apps.internal
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: argocd-server
+                  port:
+                    number: 80
+    state: present
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+  retries: 20 # Lazy wait for NGINX Ingress controller to come up
+  delay: 10
+  register: result
+  until: result is succeeded
+  when: nginx_install

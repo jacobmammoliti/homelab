@@ -1,0 +1,13 @@
+---
+longhorn:
+  defaultSettings:
+    backupTarget: nfs://blizzardnas.blizzard.internal:/volume1/backups/longhorn
+    defaultDataPath: /mnt/persist
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    host: longhorn.apps.internal
+
+  persistence:
+    defaultClassReplicaCount: 1

@@ -1,0 +1,22 @@
+---
+- name: Retrieve Longhorn manifests
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "./{{ item | basename }}"
+  with_items:
+    - https://raw.githubusercontent.com/longhorn/longhorn/v{{ longhorn_version }}/deploy/longhorn.yaml
+    
+- name: Install Longhorn
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+  with_items:
+    - longhorn.yaml
+
+- name: Remove local Lornhorn manifests
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - longhorn.yaml
