@@ -28,25 +28,25 @@ spec:
           - name: VPNSP
             valueFrom:
               secretKeyRef:
-                name: vault-openvpn-secret
+                name: pia-credentials
                 key: provider
           - name: REGION
             valueFrom:
               secretKeyRef:
-                name: vault-openvpn-secret
+                name: pia-credentials
                 key: region
           - name: OPENVPN_USER
             valueFrom:
               secretKeyRef:
-                name: vault-openvpn-secret
+                name: pia-credentials
                 key: username
           - name: OPENVPN_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: vault-openvpn-secret
+                name: pia-credentials
                 key: password
         volumeMounts:
-          - name: vault-openvpn-secret
+          - name: pia-credentials
             mountPath: '/mnt/secrets-store'
             readOnly: true
       - name: deluge
@@ -76,7 +76,7 @@ spec:
           nfs:
             server: blizzardnas.blizzard.internal
             path: /volume1/array/downloads
-        - name: vault-openvpn-secret
+        - name: pia-credentials
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
