@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: radarr
+  namespace: media
 spec:
   serviceName: radarr
   selector:
