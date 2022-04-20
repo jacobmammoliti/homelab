@@ -81,7 +81,7 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: 'vault-deluge'
+              secretProviderClass: 'deluge'
   volumeClaimTemplates:
   - metadata:
       name: config
