@@ -6,7 +6,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: deluge
-  apiGroup: rbac.authorization.k8s.io
+  namespace: media
 roleRef:
   kind: ClusterRole
   name: system:auth-delegator
