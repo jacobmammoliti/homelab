@@ -27,6 +27,7 @@ spec:
     server:
       enabled: false
     injector:
-      enabled: false
+      enabled: true
+      externalVaultAddr: "https://vault.service.blizzard.consul:8200"
     csi:
       enabled: true
