@@ -19,11 +19,11 @@ Repository containing all the orchestration code and configuration that I use to
 ### Ansible
 [Ansible](https://www.ansible.com/) is a configuration management tool responsible for the automation of initializing each node and building Kubernetes clusters.
 
+### Flux
+[Flux](https://fluxcd.io) is a continuous delivery tool responsible for deploying all applications and resources to the Kubernetes cluster.
+
 ### Kuberetes
 [K3s](https://k3s.io/) is a lightweight distribution of Kubernetes and is responsible for running the applications.
-
-### ArgoCD
-[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a GitOps tool responsible for deploying and updating the applications on Kubernetes.
 
 ### Longhorn
 [LongHorn](https://longhorn.io/) is storage solution responsible for providing persistant storage to the Kubernetes clusters.
@@ -39,11 +39,23 @@ Repository containing all the orchestration code and configuration that I use to
 
 ## Setup Environment
 ```bash
+# Create a python virtual environment
 python3 -m virtualenv venv
 
+# Activate the environment
 source venv/bin/activate
 
+# Install all necessary modules
 pip install requirements.txt
 
-ansible -m ping inventory raspberrypis
+# Bootstrap all the nodes; Install K3s on MacMini
+ansible-playbook -i inventory site.yml
+
+# Bootstrap the Kubernetes cluster via Flux
+flux bootstrap github \                                            
+--owner=$GITHUB_USER \
+--repository=homelab \
+--branch=main \
+--path=./kubernetes/clusters/macmini \
+--personal
 ```
