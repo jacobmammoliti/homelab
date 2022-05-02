@@ -10,3 +10,8 @@ usb:
 consul_ansible_group: raspberrypi
 is_consul_server: true
 datacenter: blizzard
+
+keepalived_interface: wlan0
+keepalived_vrid: 1
+keepalived_auth_pass: 1234
+keepalived_virtual_ipaddress: 192.168.1.110/24

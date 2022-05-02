@@ -6,6 +6,12 @@
     - initialize
     - consul
 
+- name: Install keepalived
+  hosts: raspberrypi
+  become: true
+  roles:
+    - keepalived
+
 - name: Create Kubernetes cluster
   hosts: macmini_k3s
   become: true
