@@ -17,7 +17,7 @@ spec:
       serviceAccountName: sonarr
       containers:
       - name: sonarr
-        image: linuxserver/sonarr:3.0.7.1477-ls136
+        image: linuxserver/sonarr:3.0.8.1507-ls143
         env:
         - name: PUID
           value: '1027'
