@@ -23,6 +23,10 @@
   - name: Install ArgoCD
     include_tasks: argocd.yml
     when: argocd_install
+
+  - name: Install Gatekeeper
+    include_tasks: gatekeeper.yml
+    when: gatekeeper_install
   delegate_to: localhost
   run_once: true
   become: false

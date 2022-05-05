@@ -1,0 +1,22 @@
+---
+- name: Retrieve Gatekeeper manifest
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "./{{ item | basename }}"
+  with_items:
+    - https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-{{ gatekeeper_version }}/deploy/gatekeeper.yaml
+
+- name: Install Gatekeeper
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+    kubeconfig: "{{ playbook_dir }}/kubeconfig"
+  with_items:
+    - gatekeeper.yaml
+
+- name: Remove local Gatekeeper manifests
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - gatekeeper.yaml
