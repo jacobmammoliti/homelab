@@ -20,13 +20,3 @@
             delaycompress
           }
         dest: /etc/logrotate.d/vault.conf
-
-    - name: Register Vault service to local Consul agent
-      community.general.consul:
-        service_name: vault
-        service_port: 8200
-        tags:
-          - vault
-        check_name: vault-hc
-        interval: 30s
-        http: https://127.0.0.1:8200/v1/sys/health?standbyok=true&&perfstandbyok=true
