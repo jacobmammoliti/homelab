@@ -1,0 +1,26 @@
+---
+- name: Run Prerequisites
+  hosts: nomad
+  become: true
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - containerd
+        state: present
+        update_cache: true
+
+    - name: Enable cgroup via boot commandline if not already
+      ansible.builtin.lineinfile:
+        path: /boot/cmdline.txt
+        regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory\b).*)$'
+        line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+        backrefs: true
+      register: cgroup
+      when: ansible_architecture == "aarch64" and ansible_distribution == "Debian"
+
+- name: Deploy HashiCorp Nomad
+  hosts: nomad
+  become: true
+  roles:
+    - nomad

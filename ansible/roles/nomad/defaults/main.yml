@@ -1,0 +1,29 @@
+---
+nomad_ansible_group: nomad
+user: nomad
+group: nomad
+
+datacenter: dc1
+
+home_directory: /etc/nomad.d
+data_directory: /opt/nomad
+tls_directory: '{{ data_directory }}/tls'
+install_directory: /usr/bin
+
+nomad_config_file: '{{ home_directory }}/nomad.hcl'
+client_config_file: '{{ home_directory }}/client.hcl'
+server_config_file: '{{ home_directory }}/server.hcl'
+
+architecture_map:
+  amd64: amd64
+  x86_64: amd64
+  armv7l: arm
+  aarch64: arm64
+
+version: '1.2.6'
+os: '{{ ansible_system | lower }}'
+architecture: '{{ architecture_map[ansible_architecture] }}'
+archive: 'nomad_{{ version }}_{{ os }}_{{ architecture }}.zip'
+download_location: 'https://releases.hashicorp.com/nomad/{{ version }}/{{ archive }}'
+
+is_nomad_server: false

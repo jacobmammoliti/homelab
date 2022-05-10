@@ -13,6 +13,9 @@ raspberrypi0[1:3]
 [vault]
 raspberrypi0[1:3]
 
+[nomad]
+raspberrypi0[1:3]
+
 [raspberrypi_k3s:children]
 raspberrypi_k3s_controllers
 raspberrypi_k3s_workers

@@ -1,0 +1,94 @@
+---
+- name: Creating Nomad group
+  ansible.builtin.group:
+    name: '{{ group }}'
+    system: true
+
+- name: Creating Nomad user
+  ansible.builtin.user:
+    name: '{{ user }}'
+    home: '{{ home_directory }}'
+    group: '{{ group }}'
+    shell: /sbin/nologin
+    system: true
+
+- name: Creating Nomad directories
+  ansible.builtin.file:
+    state: directory
+    path: '{{ item }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0750'
+  with_items:
+    - '{{ home_directory }}'
+    - '{{ data_directory }}'
+    - '{{ tls_directory }}'
+    - '{{ data_directory }}/plugins'
+
+- name: Installing Nomad binary from remote source
+  ansible.builtin.unarchive:
+    src: '{{ download_location }}'
+    dest: '{{ install_directory }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    remote_src: true
+    mode: '0755'
+  notify:
+    - Restart Nomad
+
+- name: Install containerd plugin
+  ansible.builtin.get_url:
+    url: https://github.com/Roblox/nomad-driver-containerd/releases/download/v0.9.3/containerd-driver-arm64
+    dest: '{{ data_directory }}/plugins/containerd-driver'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0750'
+  notify:
+    - Restart Nomad
+    
+- name: Templating out Nomad general configuration
+  ansible.builtin.template:
+    src: nomad.hcl.j2
+    dest: '{{ nomad_config_file }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0660'
+  notify:
+    - Restart Nomad
+
+- name: Templating out Nomad client configuration
+  ansible.builtin.template:
+    src: client.hcl.j2
+    dest: '{{ client_config_file }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0660'
+  notify:
+    - Restart Nomad
+
+- name: Templating out Nomad server configuration
+  ansible.builtin.template:
+    src: server.hcl.j2
+    dest: '{{ server_config_file }}'
+    owner: '{{ user }}'
+    group: '{{ group }}'
+    mode: '0660'
+  when: is_nomad_server
+  notify:
+    - Restart Nomad
+
+- name: Templating out systemd script
+  ansible.builtin.template:
+    src: nomad.service.j2
+    dest: /lib/systemd/system/nomad.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload Nomad daemon
+
+- name: Starting and enabling Nomad
+  ansible.builtin.systemd:
+    name: nomad
+    enabled: true
+    state: started
