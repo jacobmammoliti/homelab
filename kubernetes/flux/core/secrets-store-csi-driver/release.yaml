@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: secrets-store-csi-driver
+  namespace: kube-system
+spec:
+  releaseName: secrets-store-csi-driver
+  chart:
+    spec:
+      chart: secrets-store-csi-driver
+      sourceRef:
+        kind: HelmRepository
+        name: secrets-store-csi-driver
+        namespace: flux-system
+  interval: 5m
+  install:
+    remediation:
+      retries: 3
+  values:
+    syncSecret:
+      enabled: true
+    enableSecretRotation: true

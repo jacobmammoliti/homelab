@@ -1,0 +1,21 @@
+---
+- name: Install keepalived
+  ansible.builtin.apt:
+    name: keepalived
+    state: present
+    update_cache: true
+    autoclean: true
+  
+- name: Copy configuration file
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start and enable keepalived service
+  ansible.builtin.systemd:
+    name: keepalived
+    state: started
+    enabled: true

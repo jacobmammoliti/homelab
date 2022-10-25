@@ -1,0 +1,9 @@
+---
+allow_reboot: false
+nfs:
+  address: blizzardnas.blizzard.internal
+  remote_path: /volume1/array
+  user: media
+  group: users
+  uid: 1027
+  gid: 100

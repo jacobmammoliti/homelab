@@ -1,0 +1,16 @@
+{
+    "CN": "Blizzard Internal Root CA",
+    "key": {
+      "algo": "rsa",
+      "size": 2048
+    },
+    "names": [
+    {
+      "C": "CA",
+      "L": "Toronto",
+      "O": "Blizzard Labs",
+      "OU": "Blizzard Internal Root CA",
+      "ST": "Ontario"
+    }
+   ]
+  }

@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  template:
+    spec:
+      containers:
+        - name: prowlarr 
+          volumeMounts:
+            - name: config
+              mountPath: /config
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "longhorn"
+        resources:
+          requests:
+            storage: 1Gi

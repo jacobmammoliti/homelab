@@ -1,0 +1,29 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  releaseName: longhorn
+  chart:
+    spec:
+      chart: longhorn
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+  interval: 5m
+  install:
+    remediation:
+      retries: 3
+  values:
+    ingress:
+      enabled: true
+      host: longhorn.apps.blizzard.internal
+      tls: true
+      tlsSecret: longhorn-certificate-tls
+    persistence:
+      defaultClassReplicaCount: 2
+    defaultSettings:
+      backupTarget: nfs://blizzardnas.blizzard.internal:/volume1/array/backups

@@ -1,0 +1,21 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: radarr-certificate
+  namespace: media
+spec:
+  secretName: radarr-certificate-tls
+  issuerRef: 
+    kind: ClusterIssuer
+    name: vault-cluster-issuer
+  commonName: "radarr.apps.blizzard.internal"
+  dnsNames:
+    - "radarr.apps.blizzard.internal"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+  duration: 2160h # 90d
+  renewBefore: 350h # 15d

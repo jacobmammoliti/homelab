@@ -1,0 +1,6 @@
+*.terraform*
+*.tfstate*
+*.pem
+*.csr
+venv/
+kubeconfig

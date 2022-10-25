@@ -1,0 +1,42 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-certificate
+  namespace: monitoring
+spec:
+  secretName: grafana-certificate-tls
+  issuerRef: 
+    kind: ClusterIssuer
+    name: vault-cluster-issuer
+  commonName: "grafana.apps.blizzard.internal"
+  dnsNames:
+    - "grafana.apps.blizzard.internal"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+  duration: 2160h # 90d
+  renewBefore: 350h # 15d
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-certificate
+  namespace: monitoring
+spec:
+  secretName: prometheus-certificate-tls
+  issuerRef: 
+    kind: ClusterIssuer
+    name: vault-cluster-issuer
+  commonName: "prometheus.apps.blizzard.internal"
+  dnsNames:
+    - "prometheus.apps.blizzard.internal"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+  duration: 2160h # 90d
+  renewBefore: 350h # 15d

@@ -1,0 +1,176 @@
+---
+- name: Ensure all required packages are present
+  ansible.builtin.apt:
+    name:
+      - nfs-common
+      - unzip
+      - open-iscsi
+      - software-properties-common
+      - iptables
+      - arptables
+      - ebtables
+    state: present
+    update_cache: true
+    autoclean: true
+
+- name: Enable cgroup via boot commandline if not already
+  ansible.builtin.lineinfile:
+    path: /boot/firmware/cmdline.txt
+    backrefs: true
+    regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory\b).*)$'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+  register: cgroup
+  when: ansible_architecture == "aarch64" and ansible_distribution == "Ubuntu"
+
+- name: Enable cgroup via boot commandline if not already
+  ansible.builtin.lineinfile:
+    path: /boot/cmdline.txt
+    regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory\b).*)$'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+    backrefs: true
+  register: cgroup
+  when: ansible_architecture == "aarch64" and ansible_distribution == "Debian"
+
+- name: Switch iptables to the legacy version
+  community.general.alternatives:
+    path: "{{ item.path }}"
+    name: "{{ item.name }}"
+  loop:
+    - name: iptables
+      path: /usr/sbin/iptables-legacy
+    - name: ip6tables
+      path: /usr/sbin/ip6tables-legacy
+    - name: arptables
+      path: /usr/sbin/arptables-legacy
+    - name: ebtables
+      path: /usr/sbin/ebtables-legacy
+  when: ansible_distribution == "Debian" and ansible_distribution_version | int >= 10
+
+- name: Reboot
+  block:
+    - name: Reboot nodes
+      ansible.builtin.reboot:
+
+    - name: Wait maximum 200 seconds, but only start checking after 15 seconds
+      ansible.builtin.wait_for_connection:
+        delay: 15
+        timeout: 200
+  when:
+    - cgroup.changed
+    - allow_reboot
+
+- name: Download k3s binary for arm64
+  ansible.builtin.get_url:
+    url: "https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s-arm64"
+    checksum: "sha256:https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/sha256sum-arm64.txt"
+    dest: /usr/local/bin/k3s
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_architecture == "aarch64"
+  notify:
+    - reboot
+    - wait
+
+- name: Download k3s binary for amd64
+  ansible.builtin.get_url:
+    url: "https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s"
+    checksum: "sha256:https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/sha256sum-amd64.txt"
+    dest: /usr/local/bin/k3s
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_architecture == "x86_64"
+  notify:
+    - reboot
+    - wait
+
+- name: Ensure config directories exist
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Configure controller(s)
+  block:
+    - name: Copy K3s service file
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: 0755
+      loop:
+        - src: k3s.service.j2
+          dest: "{{ k3s_service_file }}"
+        - src: config.yaml.j2
+          dest: "{{ k3s_config_file }}"
+
+    - name: Start and enable K3s service
+      ansible.builtin.systemd:
+        name: k3s
+        state: started
+        enabled: true
+
+    - name: Wait for node token
+      ansible.builtin.wait_for:
+        path: /var/lib/rancher/k3s/server/node-token
+
+    - name: Read node token from controller
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token
+      run_once: true
+
+    - name: Store controller node token
+      ansible.builtin.set_fact:
+        token: "{{ node_token.content | b64decode | regex_replace('\n', '') }}"
+  when: 'k3s_controller_group_name in group_names'
+
+- name: Configure worker(s)
+  block:
+    - name: Copy K3s service file
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: 0755
+      loop:
+        - src: k3s.service.j2
+          dest: "{{ k3s_service_file }}"
+        - src: config.yaml.j2
+          dest: "{{ k3s_config_file }}"
+
+    - name: Write controller node token
+      ansible.builtin.copy:
+        dest: "{{ k3s_token_file }}"
+        content: "{{ hostvars[groups[k3s_controller_group_name][0]]['token'] }}"
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Start and enable K3s service
+      ansible.builtin.systemd:
+        name: k3s
+        state: started
+        enabled: true
+  when: 'k3s_worker_group_name in group_names'
+
+- name: Retrieve kubeconfig
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  when: 'k3s_controller_group_name in group_names'
+  run_once: true
+  register: kubeconfig
+
+- name: Update server in local kubeconfig
+  ansible.builtin.copy:
+    content: "{{ kubeconfig.content | b64decode | replace('127.0.0.1', hostvars[groups[k3s_controller_group_name][0]]['ansible_hostname']) }}"
+    dest: "{{ playbook_dir }}/kubeconfig"
+    mode: 0600
+  delegate_to: localhost
+  become: false
+  run_once: true

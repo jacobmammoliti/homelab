@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sonarr
+  namespace: media
+spec:
+  serviceName: sonarr
+  selector:
+    matchLabels:
+      app: sonarr
+      group: media
+  template:
+    metadata:
+      labels:
+        app: sonarr
+        group: media
+    spec:
+      serviceAccountName: sonarr
+      containers:
+        - name: sonarr
+          image: linuxserver/sonarr:3.0.8.1507-ls143
+          env:
+            - name: PUID
+              value: '1027'
+            - name: PGID
+              value: '100'
+            - name: TZ
+              value: 'America/Toronto'
+          readinessProbe:
+            tcpSocket:
+              port: 8989
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - name: sonarr
+              containerPort: 8989

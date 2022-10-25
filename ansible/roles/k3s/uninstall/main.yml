@@ -1,0 +1,54 @@
+---
+- name: Uninstall k3s cluster
+  hosts: k3s
+  become: true
+  tasks:
+    - name: Stop the K3s service
+      ansible.builtin.systemd:
+        name: k3s
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Kill all containerd processes
+      ansible.builtin.command: pkill -9 -f "k3s/data/[^/]+/bin/containerd-shim-runc"
+      register: pkill_containerd_shim_runc
+      changed_when: "pkill_containerd_shim_runc.rc == 0"
+      failed_when: false
+
+    - name: Unmount k3s filesystems
+      include_tasks: unmount_with_children.yml
+      with_items:
+        - /run/k3s
+        - /var/lib/kubelet
+        - /run/netns
+        - /var/lib/rancher/k3s
+      loop_control:
+        loop_var: mounted_fs
+
+    - name: Remove service files, binaries and data
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - /usr/local/bin/k3s
+        - /etc/systemd/system/k3s.service
+        - /etc/rancher
+        - /var/lib/kubelet
+        - /var/lib/rancher
+        - /var/lib/longhorn
+
+    - name: Reload system daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Reboot
+      block:
+        - name: Reboot nodes
+          ansible.builtin.reboot:
+
+        - name: Wait maximum 200 seconds, but only start checking after 15 seconds
+          ansible.builtin.wait_for_connection:
+            delay: 15
+            timeout: 200
+      when: allow_reboot

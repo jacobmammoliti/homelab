@@ -1,0 +1,6 @@
+---
+- name: Create k3s cluster
+  hosts: k3s
+  become: true
+  roles:
+    - k3s

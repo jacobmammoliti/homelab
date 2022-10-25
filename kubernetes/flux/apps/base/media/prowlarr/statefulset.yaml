@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  serviceName: prowlarr
+  selector:
+    matchLabels:
+      app: prowlarr
+      group: media
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+        group: media
+    spec:
+      serviceAccountName: prowlarr
+      containers:
+        - name: prowlarr
+          image: linuxserver/prowlarr:0.4.2-nightly
+          env:
+            - name: PUID
+              value: '1027'
+            - name: PGID
+              value: '100'
+            - name: TZ
+              value: 'America/Toronto'
+          readinessProbe:
+            tcpSocket:
+              port: 9696
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          ports:
+            - name: prowlarr
+              containerPort: 9696

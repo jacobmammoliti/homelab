@@ -1,0 +1,10 @@
+---
+- name: Reboot nodes
+  ansible.builtin.reboot:
+  listen: "reboot"
+
+- name: Wait maximum 200 seconds, but only start checking after 15 seconds
+  ansible.builtin.wait_for_connection:
+    delay: 15
+    timeout: 200
+  listen: "wait"

@@ -1,0 +1,34 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-certificate
+  namespace: monitoring
+spec:
+  secretName: grafana-certificate-tls
+  issuerRef: 
+    kind: ClusterIssuer
+    name: selfsigned-cluster-issuer
+  commonName: "grafana.dev.local"
+  dnsNames:
+    - "grafana.dev.local"
+  isCA: false
+  duration: 2160h # 90d
+  renewBefore: 350h # 15d
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-certificate
+  namespace: monitoring
+spec:
+  secretName: prometheus-certificate-tls
+  issuerRef: 
+    kind: ClusterIssuer
+    name: selfsigned-cluster-issuer
+  commonName: "grafana.dev.local"
+  dnsNames:
+    - "grafana.dev.local"
+  isCA: false
+  duration: 2160h # 90d
+  renewBefore: 350h # 15d

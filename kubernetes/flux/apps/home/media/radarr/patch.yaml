@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radarr
+  namespace: media
+spec:
+  template:
+    spec:
+      containers:
+      - name: radarr 
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: movies
+            mountPath: /movies
+          - name: downloads
+            mountPath: /downloads
+      volumes:
+      - name: downloads
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/downloads
+      - name: movies
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/movies
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "longhorn"
+      resources:
+        requests:
+          storage: 1Gi

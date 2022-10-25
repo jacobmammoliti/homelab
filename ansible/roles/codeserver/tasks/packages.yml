@@ -1,0 +1,5 @@
+---
+- name: Install kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ install_architecture }}/kubectl"
+    

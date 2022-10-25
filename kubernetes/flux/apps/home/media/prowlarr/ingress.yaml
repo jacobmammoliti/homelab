@@ -1,0 +1,22 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  rules:
+    - host: prowlarr.apps.blizzard.internal
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: prowlarr
+              port:
+                number: 9696
+  tls:
+    - hosts:
+        - prowlarr.apps.blizzard.internal
+      secretName: prowlarr-certificate-tls

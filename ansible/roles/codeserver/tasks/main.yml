@@ -1,0 +1,16 @@
+---
+- name: Set architecture fact for ARM
+  ansible.builtin.set_fact:
+    install_architecture: arm64
+  when: ansible_architecture == "aarch64"
+
+- name: Set architecture fact for x86_64
+  ansible.builtin.set_fact:
+    install_architecture: amd64
+  when: ansible_architecture == "x86_64"
+
+- name: Include code-server install playbook
+  include_tasks: install.yml
+
+- name: Include packages installation playbook
+  include_tasks: packages.yml

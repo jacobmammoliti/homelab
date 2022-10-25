@@ -1,0 +1,4 @@
+---
+keepalived_interface: eth0
+keepalived_vrid: 1
+keepalived_auth_pass: 1234

@@ -1,0 +1,47 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  releaseName: kube-prometheus-stack
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  interval: 5m
+  install:
+    remediation:
+      retries: 3
+  values:
+    prometheus:
+      ingress:
+        enabled: true
+        hosts:
+          - prometheus.apps.blizzard.internal
+        tls:
+          - secretName: prometheus-certificate-tls
+            hosts:
+              - prometheus.apps.blizzard.internal
+    grafana:
+      ingress:
+        enabled: true
+        hosts:
+          - grafana.apps.blizzard.internal
+        tls:
+          - secretName: grafana-certificate-tls
+            hosts:
+              - grafana.apps.blizzard.internal
+      additionalDataSources:
+        - name: loki
+          editable: false
+          jsonData:
+            tlsSkipVerify: true
+          type: loki
+          url: http://loki-stack.logging.svc.cluster.local:3100/
+          version: 1
+          orgId: 1

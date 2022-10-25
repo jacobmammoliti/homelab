@@ -1,0 +1,6 @@
+---
+- name: Install codeserver
+  hosts: codeserver
+  become: true
+  roles:
+    - codeserver

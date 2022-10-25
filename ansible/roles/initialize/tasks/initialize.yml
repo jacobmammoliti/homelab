@@ -1,0 +1,88 @@
+---
+- name: Ensure passwordless sudo
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^%sudo"
+    line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+
+- name: Create vimrc profile for '{{ ansible_user }}''
+  ansible.builtin.copy:
+    src: vimrc
+    dest: "/home/{{ ansible_user }}/.vimrc"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Create group '{{ nfs.group }}' with gid '{{ nfs.gid }}'
+  ansible.builtin.group:
+    name: "{{ nfs.group }}"
+    state: present
+    gid: "{{ nfs.gid }}"
+
+- name: Create user '{{ nfs.user }}' with uid '{{ nfs.uid }}'
+  ansible.builtin.user:
+    name: "{{ nfs.user }}"
+    home: "/home/{{ nfs.user }}"
+    group: "{{ nfs.group }}"
+    shell: /bin/bash
+    uid: "{{ nfs.uid }}"
+
+- name: Ensure all required packages are present
+  ansible.builtin.apt:
+    name:
+      - nfs-common
+      - unzip
+      - curl
+      - python3-pip
+      - software-properties-common
+      - ca-certificates
+      - vim-gui-common
+      - vim-runtime
+      - tcpdump
+      - network-manager
+    state: present
+    update_cache: true
+
+- name: Ensure all packages are up-to-date
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    autoclean: true
+
+- name: Create array directory
+  ansible.builtin.file:
+    path: /array
+    state: directory
+    mode: 0755
+    owner: "{{ nfs.user }}"
+    group: "{{ nfs.group }}"
+
+- name: Mount NFS volume to array directory
+  ansible.posix.mount:
+    src: "{{ nfs.address }}:{{ nfs.remote_path }}"
+    path: "/array"
+    opts: rw,sync,hard,intr
+    state: mounted
+    fstype: nfs
+
+- name: Add Blizzard Internal Root CA to trust
+  ansible.builtin.copy:
+    content: "{{ ca_bundle | b64decode }}"
+    dest: /usr/local/share/ca-certificates/blizzard-internal-root-ca.crt
+  when:
+    - ca_bundle is defined
+  notify:
+    - update-ca-certificates
+
+- name: Reboot
+  block:
+    - name: Reboot nodes
+      ansible.builtin.reboot:
+
+    - name: Wait maximum 200 seconds, but only start checking after 15 seconds
+      ansible.builtin.wait_for_connection:
+        delay: 15
+        timeout: 200
+  when:
+    - allow_reboot

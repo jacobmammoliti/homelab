@@ -1,0 +1,3 @@
+---
+- name: Include Keepalived install playbook
+  include_tasks: install.yml

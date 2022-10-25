@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sonarr
+  namespace: media
+spec:
+  template:
+    spec:
+      containers:
+      - name: sonarr 
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: tv-shows
+            mountPath: /tv
+          - name: downloads
+            mountPath: /downloads
+      volumes:
+      - name: downloads
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/downloads
+      - name: tv-shows
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/tv-shows
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "longhorn"
+        resources:
+          requests:
+            storage: 1Gi

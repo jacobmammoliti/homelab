@@ -1,0 +1,4 @@
+---
+# tasks file for initialize
+- name: Include initialize playbook
+  include_tasks: initialize.yml

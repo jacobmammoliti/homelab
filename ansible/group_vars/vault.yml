@@ -1,0 +1,19 @@
+---
+use_hashicorp_repository: true
+vault_version: '1.11.4-1'
+vault_storage_backend: gcs
+vault_gcs_storage_bucket: bkt-vault-storage-45884
+vault_gcs_ha_enabled: true
+vault_seal:
+  type: gcpckms
+  project: proj-security-core-15683
+  region: us-east1
+  key_ring: vault-kms
+  crypto_key: vault-key
+vault_unauthenticated_metrics_access: true
+vault_tls_cert_file: ../certs/vault.apps.blizzard.internal/server.pem
+vault_tls_key_file: ../certs/vault.apps.blizzard.internal/server-key.pem
+
+keepalived_vrid: 1
+keepalived_interface: enp1s0f0
+keepalived_virtual_ipaddress: 192.168.1.205/24

@@ -1,0 +1,22 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: deluge
+  namespace: media
+spec:
+  rules:
+    - host: deluge.apps.blizzard.internal
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: deluge
+              port:
+                number: 8112
+  tls:
+    - hosts:
+        - deluge.apps.blizzard.internal
+      secretName: deluge-certificate-tls

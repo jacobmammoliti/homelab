@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radarr
+  namespace: media
+spec:
+  serviceName: radarr
+  selector:
+    matchLabels:
+      app: radarr
+      group: media
+  template:
+    metadata:
+      labels:
+        app: radarr
+        group: media
+    spec:
+      serviceAccountName: radarr
+      containers:
+      - name: radarr
+        image: linuxserver/radarr:4.1.0.6175-ls136
+        env:
+        - name: PUID
+          value: '1027'
+        - name: PGID
+          value: '100'
+        - name: TZ
+          value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 7878
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        ports:
+        - name: radarr
+          containerPort: 7878

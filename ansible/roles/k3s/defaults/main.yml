@@ -1,0 +1,14 @@
+---
+k3s_version: v1.24.4+k3s1
+k3s_config_file: /etc/rancher/k3s/config.yaml
+k3s_service_file: /etc/systemd/system/k3s.service
+k3s_token_file: /etc/rancher/k3s/token
+k3s_server_config:
+  disable:
+    - traefik
+    - local-storage
+    - servicelb
+  flannel-backend: vxlan
+  disable-cloud-controller: true
+k3s_controller_group_name: k3s_controllers
+k3s_worker_group_name: k3s_workers

@@ -1,0 +1,6 @@
+---
+- name: Install Keepalived
+  hosts: vault
+  become: true
+  roles:
+    - keepalived

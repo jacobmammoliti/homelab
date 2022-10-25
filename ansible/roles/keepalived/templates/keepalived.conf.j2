@@ -1,0 +1,21 @@
+vrrp_instance VRRP1 {
+    state {{ keepalived_state }}
+
+#   Specify the network interface to which the virtual address is assigned
+    interface {{ keepalived_interface }}
+
+#   The virtual router ID must be unique to each VRRP instance that you define
+    virtual_router_id {{ keepalived_vrid }}
+
+#   Set the value of priority higher on the master server than on a backup server
+    priority {{ keepalived_priority }}
+
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_auth_pass }}
+    }
+    virtual_ipaddress {
+        {{ keepalived_virtual_ipaddress }}
+    }
+}
