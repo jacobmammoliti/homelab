@@ -6,6 +6,8 @@ metadata:
   namespace: media
 spec:
   serviceName: prowlarr
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: prowlarr
@@ -19,7 +21,7 @@ spec:
       serviceAccountName: prowlarr
       containers:
         - name: prowlarr
-          image: linuxserver/prowlarr:0.4.2-nightly
+          image: linuxserver/prowlarr:0.4.8-nightly
           env:
             - name: PUID
               value: '1027'

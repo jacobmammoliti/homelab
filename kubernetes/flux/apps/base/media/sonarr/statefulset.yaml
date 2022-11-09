@@ -6,6 +6,8 @@ metadata:
   namespace: media
 spec:
   serviceName: sonarr
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: sonarr
@@ -19,7 +21,7 @@ spec:
       serviceAccountName: sonarr
       containers:
         - name: sonarr
-          image: linuxserver/sonarr:3.0.8.1507-ls143
+          image: linuxserver/sonarr:3.0.9
           env:
             - name: PUID
               value: '1027'
