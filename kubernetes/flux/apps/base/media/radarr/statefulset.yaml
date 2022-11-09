@@ -6,6 +6,8 @@ metadata:
   namespace: media
 spec:
   serviceName: radarr
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: radarr
@@ -19,7 +21,7 @@ spec:
       serviceAccountName: radarr
       containers:
       - name: radarr
-        image: linuxserver/radarr:4.1.0.6175-ls136
+        image: linuxserver/radarr:4.3.1-nightly
         env:
         - name: PUID
           value: '1027'
