@@ -8,39 +8,39 @@ spec:
   selector:
     app: plex
   ports:
-    - name: plex-server
+    - name: server
       protocol: TCP
       port: 32400
       targetPort: 32400
-    - name: plex-companion
+    - name: companion
       protocol: TCP
       port: 8324
       targetPort: 8324
-    - name: plex-dlna-server-tcp
+    - name: dlna-tcp
       protocol: TCP
       port: 32469
       targetPort: 32469
-    - name: plex-dlna-server-udp
+    - name: dlna-udp
       protocol: UDP
       port: 1900
       targetPort: 1900
-    - name: plex-bonjour
+    - name: bonjour
       protocol: UDP
       port: 5353
       targetPort: 5353
-    - name: plex-gdp-a
+    - name: gdp-a
       protocol: UDP
       port: 32410
       targetPort: 32410
-    - name: plex-gdp-b
+    - name: gdp-b
       protocol: UDP
       port: 32412
       targetPort: 32412
-    - name: plex-gdp-c
+    - name: gdp-c
       protocol: UDP
       port: 32413
       targetPort: 32413
-    - name: plex-gdp-d
+    - name: dp-d
       protocol: UDP
       port: 32414
       targetPort: 32414  

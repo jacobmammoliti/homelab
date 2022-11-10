@@ -37,30 +37,30 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           ports:
-            - name: plex-server
+            - name: server
               containerPort: 32400
               hostPort: 32400
-            - name: plex-companion
+            - name: companion
               containerPort: 8324
               hostPort: 8324
-            - name: plex-dlna-server-tcp
+            - name: dlna-tcp
               containerPort: 32469
               hostPort: 32469
-            - name: plex-dlna-server-udp
+            - name: dlna-udp
               containerPort: 1900
               hostPort: 1900
-            - name: plex-bonjour
+            - name: bonjour
               containerPort: 5353
               hostPort: 5353
-            - name: plex-gdp-a
+            - name: gdp-a
               containerPort: 32410
               hostPort: 32410
-            - name: plex-gdp-b
+            - name: gdp-b
               containerPort: 32412
               hostPort: 32412
-            - name: plex-gdp-c
+            - name: gdp-c
               containerPort: 32413
               hostPort: 32413
-            - name: plex-gdp-d
+            - name: gdp-d
               containerPort: 32414
               hostPort: 32414
