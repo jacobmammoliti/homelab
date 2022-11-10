@@ -6,6 +6,8 @@ metadata:
   namespace: media
 spec:
   serviceName: plex
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: plex
