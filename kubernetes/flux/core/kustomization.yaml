@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - cert-manager
   - secrets-store-csi-driver
+  - external-secrets
   - gatekeeper
   - metallb
   - traefik
