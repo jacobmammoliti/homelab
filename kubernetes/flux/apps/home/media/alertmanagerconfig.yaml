@@ -10,8 +10,8 @@ spec:
   route:
     groupBy: ["job", "alertname"]
     groupWait: 30s
-    groupInterval: 5m
-    repeatInterval: 1m
+    groupInterval: 10m
+    repeatInterval: 6h
     receiver: "slack-receiver"
   receivers:
     - name: "slack-receiver"
