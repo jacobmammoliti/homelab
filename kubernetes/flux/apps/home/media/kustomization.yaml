@@ -4,6 +4,8 @@ kind: Kustomization
 namespace: media
 resources:
   - namespace.yaml
+  - externalsecret.yaml
+  - alertmanagerconfig.yaml
   - deluge
   - sonarr
   - radarr
