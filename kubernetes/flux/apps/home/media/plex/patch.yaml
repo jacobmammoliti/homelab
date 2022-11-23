@@ -44,7 +44,7 @@ spec:
         storageClassName: "longhorn"
         resources:
           requests:
-            storage: 2Gi
+            storage: 50Gi
     - metadata:
         name: transcode
       spec:
@@ -52,4 +52,4 @@ spec:
         storageClassName: "longhorn"
         resources:
           requests:
-            storage: 2Gi
+            storage: 10Gi
