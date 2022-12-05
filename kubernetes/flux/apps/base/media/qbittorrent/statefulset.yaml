@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  serviceName: qbittorrent
+  selector:
+    matchLabels:
+      app: qbittorrent
+      group: media
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+        group: media
+    spec:
+      serviceAccountName: qbittorrent
+      containers:
+      - name: qbittorrent
+        image: linuxserver/qbittorrent:4.5.0
+        env:
+          - name: PUID
+            value: '1027'
+          - name: PGID
+            value: '100'
+          - name: TZ
+            value: 'America/Toronto'
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        ports:
+          - name: ui
+            containerPort: 8080
+          - name: torrent
+            containerPort: 6881
