@@ -6,7 +6,7 @@ resources:
   - namespace.yaml
   - externalsecret.yaml
   - alertmanagerconfig.yaml
-  - deluge
+  # - deluge
   - qbittorrent
   - sonarr
   - radarr
