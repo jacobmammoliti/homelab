@@ -6,9 +6,9 @@ resources:
   - namespace.yaml
   - externalsecret.yaml
   - alertmanagerconfig.yaml
-  # - deluge
   - qbittorrent
   - sonarr
   - radarr
   - prowlarr
+  - unpackerr
   - plex
