@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unpackerr
+  namespace: media
+spec:
+  selector:
+    matchLabels:
+      app: unpackerr
+      group: media
+  template:
+    metadata:
+      labels:
+        app: unpackerr
+        group: media
+    spec:
+      serviceAccountName: unpackerr
+      containers:
+        - name: unpackerr
+          image: golift/unpackerr:0.11.1
+          env:
+            - name: PUID
+              value: '1027'
+            - name: PGID
+              value: '100'
+            - name: TZ
+              value: 'America/Toronto'

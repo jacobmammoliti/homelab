@@ -1,0 +1,19 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unpackerr
+  namespace: media
+spec:
+  template:
+    spec:
+      containers:
+      - name: unpackerr 
+        volumeMounts:
+          - name: downloads
+            mountPath: /downloads
+      volumes:
+      - name: downloads
+        nfs:
+          server: blizzardnas.blizzard.internal
+          path: /volume1/array/downloads/completed
