@@ -6,3 +6,5 @@ bases:
   - ../../../base/media/unpackerr
 patchesStrategicMerge:
   - patch.yaml
+resources:
+  - secretproviderclass.yaml

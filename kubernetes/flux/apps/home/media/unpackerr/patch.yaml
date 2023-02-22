@@ -9,11 +9,28 @@ spec:
     spec:
       containers:
       - name: unpackerr 
+        env:
+          - name: UN_SONARR_0_URL
+            value: 'http://sonarr:8989'
+          - name: UN_SONARR_0_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sonarr-api-key
+                key: api_key
         volumeMounts:
           - name: downloads
             mountPath: /downloads
+          - name: sonarr-api-key
+            mountPath: '/mnt/secrets-store'
+            readOnly: true
       volumes:
       - name: downloads
         nfs:
           server: blizzardnas.blizzard.internal
           path: /volume1/array/downloads/completed
+      - name: sonarr-api-key
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: unpackerr
