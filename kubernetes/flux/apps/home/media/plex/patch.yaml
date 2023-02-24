@@ -30,6 +30,9 @@ spec:
         nfs:
           server: blizzardnas.blizzard.internal
           path: /volume1/array
+      - name: transcode
+        emptyDir:
+          sizeLimit: 25Gi
       - name: plex-credentials
         csi:
           driver: secrets-store.csi.k8s.io
@@ -45,11 +48,3 @@ spec:
         resources:
           requests:
             storage: 50Gi
-    - metadata:
-        name: transcode
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: "longhorn"
-        resources:
-          requests:
-            storage: 15Gi
