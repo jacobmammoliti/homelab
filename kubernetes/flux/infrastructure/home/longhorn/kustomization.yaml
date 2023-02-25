@@ -5,3 +5,7 @@ resources:
   - ../../base/longhorn
   - certificate.yaml
   - release.yaml
+  - servicemonitor.yaml
+  - externalsecret.yaml # needed before alertmanagerconfig
+  - prometheusrule.yaml
+  - alertmanagerconfig.yaml
