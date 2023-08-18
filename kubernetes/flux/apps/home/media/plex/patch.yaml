@@ -9,16 +9,7 @@ spec:
     spec:
       containers:
       - name: plex
-        env:
-          - name: PLEX_CLAIM
-            valueFrom:
-              secretKeyRef:
-                name: plex-credentials
-                key: claim
         volumeMounts:
-          - name: plex-credentials
-            mountPath: '/mnt/secrets-store'
-            readOnly: true
           - name: config
             mountPath: /config
           - name: transcode
@@ -33,12 +24,6 @@ spec:
       - name: transcode
         emptyDir:
           sizeLimit: 25Gi
-      - name: plex-credentials
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: plex
   volumeClaimTemplates:
     - metadata:
         name: config
